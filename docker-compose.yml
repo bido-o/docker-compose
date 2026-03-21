@@ -30,11 +30,9 @@ services:
       #- postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-# Definim rețeaua comună
 networks:
   bido-network:
     driver: bridge
 
-# Definim volumul unde se vor salva fizic datele din baza de date
 #volumes:
   #postgres-data:
