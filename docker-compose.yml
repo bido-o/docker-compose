@@ -31,7 +31,7 @@ services:
     expose:
       - "8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-server:5432/auth_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-server:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
     networks:
