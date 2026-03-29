@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     environment:
       - AUTH_SERVICE_URL=http://auth-container:8081
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     networks:
       - bido-network
     restart: unless-stopped
@@ -36,6 +37,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     networks:
       - bido-network
     restart: unless-stopped
