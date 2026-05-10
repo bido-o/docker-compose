@@ -24,7 +24,7 @@ services:
     networks:
       - bido-network
     volumes:
-      - ../bido-resources/database/users:/docker-entrypoint-initdb.d
+      - ../bido-resources/database:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
   auth:
