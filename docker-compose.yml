@@ -1,4 +1,21 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-container
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    expose:
+      - "6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - bido-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   api-gateway:
     build:
       context: ../api-gateway
@@ -8,9 +25,15 @@ services:
     environment:
       - AUTH_SERVICE_URL=http://auth-container:8081
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - REDIS_HOST=redis-container
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - bido-network
     restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
 
   postgres-db:
     image: postgres:18
@@ -46,3 +69,6 @@ services:
 
 networks:
   bido-network:
+
+volumes:
+  redis-data:
