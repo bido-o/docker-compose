@@ -41,6 +41,8 @@ services:
     container_name: postgres-db-container
     ports:
       - "5432:5432"
+#    expose:
+#      - "5432"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -59,6 +61,40 @@ services:
       - "8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/auth_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    networks:
+      - bido-network
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+
+  profile:
+    build:
+      context: ../profile
+    container_name: profile-container
+    expose:
+      - "8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/profile_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    networks:
+      - bido-network
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+
+  bidding-service:
+    build:
+      context: ../bidding-service
+    container_name: bidding-service-container
+    expose:
+      - "8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/bidding_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
