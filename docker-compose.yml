@@ -27,6 +27,7 @@ services:
       - AUTH_SERVICE_URL=http://auth-container:8080
       - PROFILE_SERVICE_URL=http://profile-container:8080
       - BIDDING_SERVICE_URL=http://bidding-service-container:8080
+      - MENU_SERVICE_URL=http://menu-container:8080
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - REDIS_HOST=redis-container
       - REDIS_PORT=6379
@@ -84,7 +85,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/profile_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     networks:
       - bido-network
     restart: unless-stopped
@@ -102,7 +102,23 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/bidding_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    networks:
+      - bido-network
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+
+  menu:
+    build:
+      context: ../menu
+    container_name: menu-container
+    expose:
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/menu_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
     networks:
       - bido-network
     restart: unless-stopped
