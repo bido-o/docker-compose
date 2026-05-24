@@ -16,6 +16,15 @@ services:
       timeout: 5s
       retries: 3
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin-container
+    ports:
+      - "9411:9411"
+    networks:
+      - bido-network
+    restart: unless-stopped
+
   api-gateway:
     build:
       context: ../api-gateway
@@ -32,12 +41,15 @@ services:
       - REDIS_HOST=redis-container
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - ZIPKIN_ENDPOINT=http://zipkin-container:9411/api/v2/spans
     networks:
       - bido-network
     restart: unless-stopped
     depends_on:
       redis:
         condition: service_healthy
+      zipkin:
+        condition: service_started
 
   postgres-db:
     image: postgres:18
@@ -68,11 +80,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ZIPKIN_ENDPOINT=http://zipkin-container:9411/api/v2/spans
     networks:
       - bido-network
     restart: unless-stopped
     depends_on:
       - postgres-db
+      - zipkin
 
   profile:
     build:
@@ -85,11 +99,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/profile_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - ZIPKIN_ENDPOINT=http://zipkin-container:9411/api/v2/spans
     networks:
       - bido-network
     restart: unless-stopped
     depends_on:
       - postgres-db
+      - zipkin
 
   bidding-service:
     build:
@@ -102,11 +118,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/bidding_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - ZIPKIN_ENDPOINT=http://zipkin-container:9411/api/v2/spans
     networks:
       - bido-network
     restart: unless-stopped
     depends_on:
       - postgres-db
+      - zipkin
 
   menu:
     build:
@@ -119,11 +137,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db-container:5432/menu_db
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - ZIPKIN_ENDPOINT=http://zipkin-container:9411/api/v2/spans
     networks:
       - bido-network
     restart: unless-stopped
     depends_on:
       - postgres-db
+      - zipkin
 
 networks:
   bido-network:
